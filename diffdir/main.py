@@ -2,7 +2,16 @@ import os
 import sys
 from diffdir.ContentDirCmp import ContentDirCmp
 import argparse
+import signal
 from colorama import init, Style, Fore
+
+
+def catchthesignal(signal, frame):
+    sys.exit(1)
+
+
+signal.signal(signal.SIGINT, catchthesignal)
+
 
 init()
 
