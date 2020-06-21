@@ -36,8 +36,8 @@ def main():
 
     args = parser.parse_args()
 
-    dir_a = args.dir_a
-    dir_b = args.dir_b
+    dir_a = os.path.expanduser(args.dir_a)
+    dir_b = os.path.expanduser(args.dir_b)
     dd = ContentDirCmp(dir_a, dir_b)
     lefts, rights, diffs, funnys = [], [], [], []
     for lx, rx, dx, fx in dd.work():

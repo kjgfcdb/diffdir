@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="diffdir",
-    version="0.4",
+    version="0.5",
     description="Diff directories",
     license="MIT Licence",
     author="cdb",

@@ -22,12 +22,15 @@ class ContentDirCmp(dircmp):
     def get_diff_info(self):
         common_head = []
         for part_a, part_b in zip(
-            Path(self.left).splitall(), Path(self.right).splitall()
+            Path(self.left).splitall()[::-1], Path(self.right).splitall()[::-1]
         ):
             if part_a != part_b:
-                continue
+                break
             common_head.append(part_a)
-        common_head = os.path.join(*common_head)
+        if common_head:
+            common_head = os.path.join(*common_head[::-1])
+        else:
+            common_head = ""
         file_lists = [
             self.left_only,
             self.right_only,
@@ -37,7 +40,10 @@ class ContentDirCmp(dircmp):
         ret = [None for _ in range(len(file_lists))]
         heads = [self.left, self.right, common_head, common_head]
         for i in range(len(ret)):
-            ret[i] = (f"{heads[i]}/{item}" for item in file_lists[i])  # generator
+            if heads[i]:
+                ret[i] = (f"{heads[i]}/{item}" for item in file_lists[i])  # generator
+            else:
+                ret[i] = (f"{item}" for item in file_lists[i])  # generator
         return ret  # left_only, right_only, diff_files, funny_files
 
     methodmap = dict(
@@ -59,4 +65,3 @@ class ContentDirCmp(dircmp):
         yield self.get_diff_info()
         for sd in self.subdirs.values():
             yield from sd.work()
-

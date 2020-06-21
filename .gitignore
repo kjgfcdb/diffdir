@@ -1,3 +1,4 @@
 dist/**
 diffdir.egg-info/**
 build/**
+**.pyc
