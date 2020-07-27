@@ -1,5 +1,5 @@
 import os
-from path import Path
+from os.path import join
 from filecmp import dircmp, cmpfiles
 
 
@@ -15,35 +15,16 @@ class ContentDirCmp(dircmp):
     def my_phase4(self):
         self.subdirs = {}
         for x in self.common_dirs:
-            a_x = os.path.join(self.left, x)
-            b_x = os.path.join(self.right, x)
+            a_x = join(self.left, x)
+            b_x = join(self.right, x)
             self.subdirs[x] = ContentDirCmp(a_x, b_x, self.ignore, self.hide)
 
     def get_diff_info(self):
-        common_head = []
-        for part_a, part_b in zip(
-            Path(self.left).splitall()[::-1], Path(self.right).splitall()[::-1]
-        ):
-            if part_a != part_b:
-                break
-            common_head.append(part_a)
-        if common_head:
-            common_head = os.path.join(*common_head[::-1])
-        else:
-            common_head = ""
-        file_lists = [
-            self.left_only,
-            self.right_only,
-            self.diff_files,
-            self.funny_files,
-        ]
-        ret = [None for _ in range(len(file_lists))]
-        heads = [self.left, self.right, common_head, common_head]
-        for i in range(len(ret)):
-            if heads[i]:
-                ret[i] = (f"{heads[i]}/{item}" for item in file_lists[i])  # generator
-            else:
-                ret[i] = (f"{item}" for item in file_lists[i])  # generator
+        ret = []
+        ret.append((join(self.left, item) for item in self.left_only))
+        ret.append((join(self.right, item) for item in self.right_only))
+        ret.append((join(self.left, item) for item in self.diff_files))
+        ret.append((join(self.left, item) for item in self.funny_files))
         return ret  # left_only, right_only, diff_files, funny_files
 
     methodmap = dict(
@@ -65,3 +46,9 @@ class ContentDirCmp(dircmp):
         yield self.get_diff_info()
         for sd in self.subdirs.values():
             yield from sd.work()
+
+
+if __name__ == "__main__":
+    for lx, rx, dx, fx in ContentDirCmp("./foo", "./bar/foo").work():
+        for item in dx:
+            print(item)

@@ -1,4 +1,5 @@
 import os
+from os.path import join, expanduser, realpath
 import sys
 from diffdir.ContentDirCmp import ContentDirCmp
 import argparse
@@ -29,6 +30,10 @@ def diff_files(f1, f2):
         os.system("vimdiff " + f1 + " " + f2)
 
 
+def strip_diff_item(dir_a, diff_item):
+    return diff_item[len(dir_a) + 1 :]
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("dir_a", help="directory a")
@@ -36,8 +41,8 @@ def main():
 
     args = parser.parse_args()
 
-    dir_a = os.path.expanduser(args.dir_a)
-    dir_b = os.path.expanduser(args.dir_b)
+    dir_a = expanduser(args.dir_a)
+    dir_b = expanduser(args.dir_b)
     dd = ContentDirCmp(dir_a, dir_b)
     lefts, rights, diffs, funnys = [], [], [], []
     for lx, rx, dx, fx in dd.work():
@@ -55,6 +60,7 @@ def main():
         for rx in rights:
             print(f"{Fore.CYAN}Only in {dir_b}:\t{rx}{Style.RESET_ALL}")
         for i, dx in enumerate(diffs):
+            dx = strip_diff_item(dir_a, dx)
             print(
                 Fore.YELLOW
                 + f"({i})  Diff {Fore.MAGENTA}{dir_a}\t{Fore.CYAN}{dir_b}\t\t{Fore.YELLOW}{dx}{Style.RESET_ALL}"
@@ -65,16 +71,18 @@ def main():
             break
         if op == "d":
             for diff_item in diffs:
+                diff_item = strip_diff_item(dir_a, diff_item)
                 diff_item = diff_item.lstrip("/")
-                f1 = os.path.join(dir_a.rstrip("/"), diff_item)
-                f2 = os.path.join(dir_b.rstrip("/"), diff_item)
+                f1 = join(dir_a.rstrip("/"), diff_item)
+                f2 = join(dir_b.rstrip("/"), diff_item)
                 diff_files(f1, f2)
                 input("Press any key to continue")
         elif len(op) > 1 and op[0] == "d":
             try:
                 diff_item = diffs[int(op[1:])]
-                f1 = os.path.join(dir_a.rstrip("/"), diff_item)
-                f2 = os.path.join(dir_b.rstrip("/"), diff_item)
+                diff_item = strip_diff_item(dir_a, diff_item)
+                f1 = join(dir_a.rstrip("/"), diff_item)
+                f2 = join(dir_b.rstrip("/"), diff_item)
                 diff_files(f1, f2)
             except:
                 print(
