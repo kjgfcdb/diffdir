@@ -31,6 +31,8 @@ def diff_files(f1, f2):
 
 
 def strip_diff_item(dir_a, diff_item):
+    dir_a = os.path.abspath(dir_a)
+    diff_item = os.path.abspath(diff_item)
     return diff_item[len(dir_a) + 1 :]
 
 
