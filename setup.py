@@ -7,7 +7,7 @@ with open(path.join(this_directory, "readme.md"), encoding="utf-8") as f:
 
 setup(
     name="diffdir",
-    version="0.8",
+    version="0.9",
     description="Diff directories",
     url="https://github.com/kjgfcdb/diffdir",
     license="MIT Licence",

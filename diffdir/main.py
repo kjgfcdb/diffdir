@@ -11,6 +11,12 @@ def catchthesignal(signal, frame):
     sys.exit(1)
 
 
+def emit(msg, ignore):
+    if ignore in msg:
+        return
+    print(msg)
+
+
 signal.signal(signal.SIGINT, catchthesignal)
 
 
@@ -40,14 +46,14 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("dir_a", help="directory a")
     parser.add_argument("dir_b", help="directory b")
+    parser.add_argument("--ignore", help="ignore pattern", required=False)
 
     args = parser.parse_args()
 
     dir_a = expanduser(args.dir_a)
     dir_b = expanduser(args.dir_b)
-    dd = ContentDirCmp(dir_a, dir_b)
     lefts, rights, diffs, funnys = [], [], [], []
-    for lx, rx, dx, fx in dd.work():
+    for lx, rx, dx, fx in ContentDirCmp(dir_a, dir_b).work():
         lefts.extend(lx)
         rights.extend(rx)
         diffs.extend(dx)
@@ -58,14 +64,15 @@ def main():
     # main loop
     while True:
         for lx in lefts:
-            print(f"{Fore.MAGENTA}Only in {dir_a}:\t{lx}{Style.RESET_ALL}")
+            emit(f"{Fore.MAGENTA}Only in {dir_a}:\t{lx}{Style.RESET_ALL}", args.ignore)
         for rx in rights:
-            print(f"{Fore.CYAN}Only in {dir_b}:\t{rx}{Style.RESET_ALL}")
+            emit(f"{Fore.CYAN}Only in {dir_b}:\t{rx}{Style.RESET_ALL}", args.ignore)
         for i, dx in enumerate(diffs):
             dx = strip_diff_item(dir_a, dx)
-            print(
+            emit(
                 Fore.YELLOW
-                + f"({i})  Diff {Fore.MAGENTA}{dir_a}\t{Fore.CYAN}{dir_b}\t\t{Fore.YELLOW}{dx}{Style.RESET_ALL}"
+                + f"({i})  Diff {Fore.MAGENTA}{dir_a}\t{Fore.CYAN}{dir_b}\t\t{Fore.YELLOW}{dx}{Style.RESET_ALL}",
+                args.ignore,
             )
         print("(q)Quit;(d)Diff all;(dX)Diff line X")
         op = input()
