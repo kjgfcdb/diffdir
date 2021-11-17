@@ -12,7 +12,7 @@ def catchthesignal(signal, frame):
 
 
 def emit(msg, ignore):
-    if ignore in msg:
+    if ignore is not None and ignore in msg:
         return
     print(msg)
 
